@@ -1,11 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Index</title>
-</head>
-<body>
-    hello
-</body>
-</html>
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+  Home
+{% endblock %}
+
+{% block content %}
+  <div class="conatiner">
+    <ul>
+      <li>
+        <a href="/species">Create Species</a>
+      </li>
+      <li>
+        <a href="/gardeners">Create Gardeners</a>
+      </li>
+    </ul>
+  </div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'bootstrap/base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+  <title>Species Forms</title>
+{% endblock %}
+
+
+{% block content %}
+  <div class="container">
+    <form action="/gardeners" method="post">
+      {{ form.csrf_token }}
+      <div class="mb-3">
+        {{ wtf.form_field(form.name)}}
+      </div>
+      <div class="mb-3">
+        {{ wtf.form_field(form.surname)}}
+      </div>
+      <div class="mb-3">
+        {{ wtf.form_field(form.email)}}
+      </div>
+      
+      <input type="submit" value="Create Gardener" />
+    </form>
+  </div>
+{% endblock %}
