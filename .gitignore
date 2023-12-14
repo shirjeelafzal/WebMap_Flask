@@ -1,0 +1,4 @@
+webmapVenv/
+.gitignore
+.env
+flask_project

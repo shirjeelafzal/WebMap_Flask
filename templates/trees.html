@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+  Trees
+{% endblock %}
+
+{% block content %}
+  {% for message in get_flashed_messages() %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+  <div class="container mt-4" style="display:flex;justify-content: center;align-items: center;">
+    <form action="/trees" method="post" style="display:flex;justify-content:space-evenly;width:80%;">
+      <div class="left-form">
+        {{ form.csrf_token }}
+        <div class="mb-3">{{ wtf.form_field(form.location_x) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.height) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.planting_date) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.species_id) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.state_of_conservation) }}</div>
+      </div>
+      <div class="right-form">
+        <div class="mb-3">{{ wtf.form_field(form.location_y) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.diameter) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.last_pruning) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.gardener_id) }}</div>
+
+        <input type="submit" value="Submit" />
+      </div>
+    </form>
+  </div>
+  <div class="container">
+    <table class="table">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Sr No</th>
+          <th scope="col">Planting Date</th>
+          <th scope="col">State of Conservation</th>
+          <th scope="col">Height</th>
+          <th scope="col">Diameter</th>
+          <th scope="col">Last Pruning</th>
+          <th scope="col">Location</th>
+          <th scope="col">Gardener</th>
+          <th scope="col">Species</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tree in trees %}
+          <tr>
+            <th scope="row">{{ loop.index }}</th>
+            <td>{{ tree.planting_date }}</td>
+            <td>{{ tree.state_of_conservation }}</td>
+            <td>{{ tree.height }}</td>
+            <td>{{ tree.diameter }}</td>
+            <td>{{ tree.last_pruning }}</td>
+            <td>{{ tree.location }}</td>
+            <td>{{ tree.gardener_id }}</td>
+            <td>{{ tree.species_id }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

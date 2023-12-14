@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block title %}
+  Sign UP
+{% endblock %}
+{% block content %}
+{% for message in get_flashed_messages() %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+  <div class="container d-flex align-items-center justify-content-center" style="height: 90vh;">
+    <div class="col-md-5">
+      <form action="/signup" method="post">
+        {{ form.csrf_token }}
+        <div class="mb-3">{{ wtf.form_field(form.first_name) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.last_name) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.email) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.password) }}</div>
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

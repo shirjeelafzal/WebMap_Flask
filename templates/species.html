@@ -1,33 +1,59 @@
-{% extends 'bootstrap/base.html' %}
+{% extends 'base.html' %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block title %}
-  <title>Species Forms</title>
+  Species
 {% endblock %}
 
 {% block content %}
-  <div class="container">
-    <form action="/species" method="post">
+  {% for message in get_flashed_messages() %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+  <div class="container mt-4" style="display: flex;justify-content:center;align-items: center;">
+    <form action="/species" method="post" style="display: flex;justify-content:space-evenly;width: 80%;">
       {{ form.csrf_token }}
-      <div class="mb-3">
-        {{ wtf.form_field(form.scientific_name)}}
+      <div>
+        <div class="mb-3">{{ wtf.form_field(form.scientific_name) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.common_name) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.family) }}</div>
       </div>
-      <div class="mb-3">
-        {{ wtf.form_field(form.common_name)}}
+      <div>
+        <div class="mb-3">{{ wtf.form_field(form.maximum_height) }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.beginning_of_flowering, format = '%Y-%m-%d') }}</div>
+        <div class="mb-3">{{ wtf.form_field(form.end_of_flowering, format = '%Y-%m-%d') }}</div>
+        <input type="submit" value="Submit" />
       </div>
-      <div class="mb-3">
-        {{ wtf.form_field(form.family)}}
-      </div>
-      <div class="mb-3">
-        {{ wtf.form_field(form.maximum_height)}}
-      </div>
-      <div class="mb-3">
-        {{ wtf.form_field(form.beginning_of_flowering, format='%Y-%m-%d')}}
-      </div>
-      <div class="mb-3">
-        {{ wtf.form_field(form.end_of_flowering, format='%Y-%m-%d') }}
-      </div>
-      <input type="submit" value="Create Species" />
     </form>
+  </div>
+  <div class="container mt-4">
+    <table class="table">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Sr No</th>
+          <th scope="col">Scientific Nname</th>
+          <th scope="col">Common Name</th>
+          <th scope="col">Family</th>
+          <th scope="col">Maximum Height</th>
+          <th scope="col">Beginning of Flowering</th>
+          <th scope="col">End of Flowering</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for specie in species %}
+          <tr>
+            <th scope="row">{{ loop.index }}</th>
+            <td>{{ specie.scientific_name }}</td>
+            <td>{{ specie.common_name }}</td>
+            <td>{{ specie.family }}</td>
+            <td>{{ specie.maximum_height }}</td>
+            <td>{{ specie.beginning_of_flowering }}</td>
+            <td>{{ specie.end_of_flowering }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 {% endblock %}

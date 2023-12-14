@@ -1,26 +1,53 @@
-{% extends 'bootstrap/base.html' %}
+{% extends 'base.html' %}
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block title %}
-  <title>Species Forms</title>
+  Species
 {% endblock %}
 
-
 {% block content %}
-  <div class="container">
-    <form action="/gardeners" method="post">
+  {% for message in get_flashed_messages() %}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+   
+  {% endfor %}
+  <div class="container mt-4" style="display:flex;justify-content: center;align-items: center;">
+    <form action="/gardeners" method="post" style="justify-content:space-evenly;width:50%;">
       {{ form.csrf_token }}
-      <div class="mb-3">
-        {{ wtf.form_field(form.name)}}
-      </div>
-      <div class="mb-3">
-        {{ wtf.form_field(form.surname)}}
-      </div>
-      <div class="mb-3">
-        {{ wtf.form_field(form.email)}}
-      </div>
-      
-      <input type="submit" value="Create Gardener" />
+      <div class="mb-3">{{ wtf.form_field(form.name) }}</div>
+      <div class="mb-3">{{ wtf.form_field(form.surname) }}</div>
+      <div class="mb-3">{{ wtf.form_field(form.email) }}</div>
+
+      <input type="submit" value="Submit" />
     </form>
+  </div>
+  <div class="container mt-4">
+    <table class="table">
+      <thead class="table-light">
+        <tr>
+          <th scope="col">Sr No</th>
+          <th scope="col">Name</th>
+          <th scope="col">Sur Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for gardener in gardeners %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ gardener.name }}</td>
+            <td>{{ gardener.surname }}</td>
+            <td>{{ gardener.email }}</td>
+            <td>
+              <a href="/gardeners?gardener_id={{ gardener.id }}"><img src="static/svgs/update.svg" alt="Update" /></a>
+              <a href="/gardeners?gardener_id={{ gardener.id }}"><img src="static/svgs/Delete.svg" alt="Delete" /></a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 {% endblock %}
