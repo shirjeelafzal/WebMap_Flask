@@ -2,4 +2,4 @@ webmapVenv/
 .env
 flask_project
 migrations/
-__pychache__
+__pychache__/
