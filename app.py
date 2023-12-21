@@ -12,16 +12,13 @@ from flask import Flask, render_template, request, redirect, url_for
 from datetime import datetime
 from geoalchemy2 import WKTElement
 from flask_bootstrap import Bootstrap
-from wtforms import StringField, IntegerField, DateTimeField, DateField
-from wtforms.validators import DataRequired, Length, Optional
+from wtforms import StringField, IntegerField, DateField, SelectField
+from wtforms.validators import DataRequired, Length
 from sqlalchemy.exc import SQLAlchemyError
 from flask_admin.contrib.sqla import ModelView
 from flask_admin import Admin
-from shapely import wkt
 from sqlalchemy import func
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from geoalchemy2.shape import to_shape
 
 app = Flask(__name__)
@@ -74,13 +71,13 @@ class species_model(db.Model):
 class trees_model(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     location = db.Column(Geometry(geometry_type='POINT', srid=4326))
-    planting_date = db.Column(db.Date, nullable=True)
-    state_of_conservation = db.Column(db.String(80), nullable=True)
-    height = db.Column(db.Integer, nullable=True)
-    diameter = db.Column(db.Integer, nullable=True)
-    last_pruning = db.Column(db.Date, nullable=True)
-    gardener_id = db.Column(db.Integer, ForeignKey('gardeners_model.id'), nullable=True)
-    species_id = db.Column(db.Integer, ForeignKey('species_model.id'), nullable=True)
+    planting_date = db.Column(db.Date)
+    state_of_conservation = db.Column(db.String(80))
+    height = db.Column(db.Integer)
+    diameter = db.Column(db.Integer)
+    last_pruning = db.Column(db.Date)
+    gardener_id = db.Column(db.Integer, ForeignKey('gardeners_model.id'))
+    species_id = db.Column(db.Integer, ForeignKey('species_model.id'))
 
     gardener = relationship('gardeners_model', back_populates='trees')
     species = relationship('species_model', back_populates='trees')
@@ -156,13 +153,13 @@ class TreesForm(FlaskForm):
         model = trees_model
     location_x = FloatField('Location X', validators=[DataRequired()])
     location_y = FloatField('Location Y', validators=[DataRequired()])
-    planting_date = DateField('Planting Date')
-    state_of_conservation = StringField('State of Conservation')
-    height = IntegerField('Height')
-    diameter = IntegerField('Diameter')
-    last_pruning = DateField('Last Pruning')
-    gardener_id = IntegerField('Gardener')
-    species_id = IntegerField('Species')
+    planting_date = DateField('Planting Date', validators=[DataRequired()])
+    state_of_conservation = StringField('State of Conservation', validators=[DataRequired()])
+    height = IntegerField('Height', validators=[DataRequired()])
+    diameter = IntegerField('Diameter', validators=[DataRequired()])
+    last_pruning = DateField('Last Pruning', validators=[DataRequired()])
+    gardener_id = SelectField('Gardener', coerce=int,validators=[DataRequired()],choices=[])
+    species_id = SelectField('Species', coerce=int,validators=[DataRequired()],choices=[])
     submit=SubmitField("Submit")
 ################################# adding routes######################
 
@@ -356,18 +353,29 @@ def update_gardeners(id):
         flash("Gardener has been updated.")
         return redirect(url_for("gardeners"))
     return render_template('update_gardeners.html',form=form,gardener_to_update=gardener_to_update)
-    
+
 @app.route('/trees', methods=['GET', 'POST'])
 @login_required
 def trees():
     form = TreesForm()
-    lon=request.args.get('lon')
-    lat=request.args.get('lat')
+    lon = request.args.get('lon')
+    lat = request.args.get('lat')
+
+    species = species_model.query.all()
+    gardeners = gardeners_model.query.all()
+
+    species_choices = [(specie.id, specie.common_name) for specie in species]
+    gardener_choices = [(gardener.id, gardener.name) for gardener in gardeners]
+
+    form.species_id.choices = species_choices
+    form.gardener_id.choices = gardener_choices
+
     try:
         if form.validate_on_submit():
-            print('Form is being submited')
+            # Process form submission
             location_x = float(form['location_x'].data)
             location_y = float(form['location_y'].data)
+
             model_data = {
                 'planting_date': datetime.strptime(str(form['planting_date'].data), '%Y-%m-%d'),
                 'state_of_conservation': form['state_of_conservation'].data,
@@ -378,24 +386,24 @@ def trees():
                 'species_id': int(form['species_id'].data),
                 'location': WKTElement(f'POINT({location_x} {location_y})', srid=4326),
             }
-            print(model_data)
+
             new_tree = trees_model(**model_data)
             db.session.add(new_tree)
             db.session.commit()
+            
             flash('Form Submitted Successfully')
-            form.process()
-            form.errors.clear()
             return redirect(url_for('trees'))
         else:
-            print(f'erorrs: {form.errors}')
+            print(f'errors: {form.errors}')
     except SQLAlchemyError as e:
-        db.session.rollback()  # Roll back the changes made in the current session
+        db.session.rollback()
         print(f"Error: {e}")
-        return redirect(url_for("trees"))
+
     trees = trees_model.query.all()
+
     if lon is not None and lat is not None:
-        return render_template('trees.html',form=form,trees=trees,lon=lon,lat=lat)
-        
+        return render_template('trees.html', form=form, trees=trees, lon=lon, lat=lat)
+
     return render_template('trees.html', form=form, trees=trees)
 
 @app.route('/trees/delete/<int:id>')
@@ -412,43 +420,51 @@ def delete_trees(id):
         flash("Error deleting the tree. Try again")
         return redirect(url_for('trees'))
 
-@app.route('/trees/update/<int:id>',methods=['GET', 'POST'])
+@app.route('/trees/update/<int:id>', methods=['GET', 'POST'])
 @login_required
 def update_trees(id):
-    form=TreesForm()
-    tree_to_update=trees_model.query.get_or_404(id)
-    
-    if form.validate_on_submit():
-        print("form is valid")
-        print("Form data:", form.data)
-        location_x = float(form.location_x.data)
-        location_y = float(form.location_y.data)
-        location=WKTElement(f'POINT({location_x} {location_y})', srid=4326)
-        tree_to_update.location=location
-        tree_to_update.height=form.height.data
-        tree_to_update.planting_date=form.planting_date.data
-        tree_to_update.species_id=form.species_id.data
-        tree_to_update.state_of_conservation=form.state_of_conservation.data
-        tree_to_update.diameter=form.diameter.data
-        tree_to_update.last_pruning=form.last_pruning.data
-        tree_to_update.gardener_id=form.gardener_id.data
-        db.session.commit()
-        flash("Tree has been updated.")
-        return redirect(url_for("trees"))
-    else:
-        print("Form errors:", form.errors)
-        
-    if tree_to_update:
-        location=tree_to_update.location
-    query = db.session.query(
-    func.ST_X(location).label('location_x'),
-    func.ST_Y(location).label('location_y')
-    )
-    result = query.first()
-    location_x = result.location_x
-    location_y = result.location_y
-    return render_template('update_trees.html',form=form,tree_to_update=tree_to_update,location_x=location_x,location_y=location_y)
+    tree_to_update = trees_model.query.get_or_404(id)
+    species = species_model.query.all()
+    gardeners = gardeners_model.query.all()
 
+    species_choices = [(specie.id, specie.common_name) for specie in species]
+    gardener_choices = [(gardener.id, gardener.name) for gardener in gardeners]
+
+    form = TreesForm(obj=tree_to_update) 
+    form.species_id.choices = species_choices
+    form.gardener_id.choices = gardener_choices
+
+    if form.validate_on_submit():
+        try:
+            location_x = float(form.location_x.data)
+            location_y = float(form.location_y.data)
+            location = WKTElement(f'POINT({location_x} {location_y})', srid=4326)
+            tree_to_update.location = location
+            tree_to_update.height=form.height.data
+            tree_to_update.planting_date=form.planting_date.data
+            tree_to_update.species_id=form.species_id.data
+            tree_to_update.state_of_conservation=form.state_of_conservation.data
+            tree_to_update.diameter=form.diameter.data
+            tree_to_update.last_pruning=form.last_pruning.data
+            tree_to_update.gardener_id=form.gardener_id.data
+            db.session.commit()
+            flash("Tree has been updated.")
+            return redirect(url_for("trees"))
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            print(f"Error: {e}")
+            flash("Error updating tree.")
+    if tree_to_update:
+        location = tree_to_update.location
+        query = db.session.query(
+            func.ST_X(location).label('location_x'),
+            func.ST_Y(location).label('location_y')
+        )
+        result = query.first()
+        location_x = result.location_x
+        location_y = result.location_y
+    print("about to render the update.html")
+    return render_template('update_trees.html', form=form, tree_to_update=tree_to_update, location_x=location_x, location_y=location_y)
 
 
 if __name__ == "__main__":
