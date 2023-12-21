@@ -12,19 +12,19 @@
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
   {% endfor %}
-  <div class="container mt-4" style="display: flex;justify-content:center;align-items: center;">
+  <div class="container mt-4 shadow-sm p-3 mb-5 bg-body rounded" style="display: flex;justify-content:center;align-items: center; max-width: 100%;">
     <form action="/species" method="post" style="display: flex;justify-content:space-evenly;width: 80%;">
-      {{ form.csrf_token }}
+      {{ form.hidden_tag() }}
       <div>
-        <div class="mb-3">{{ wtf.form_field(form.scientific_name) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.common_name) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.family) }}</div>
+        <div>{{ form.scientific_name.label(class = 'form-label') }}: {{ form.scientific_name(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.common_name.label(class = 'form-label') }}: {{ form.common_name(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.family.label(class = 'form-label') }}: {{ form.family(class = 'mb-3 form-control') }}</div>
       </div>
       <div>
-        <div class="mb-3">{{ wtf.form_field(form.maximum_height) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.beginning_of_flowering, format = '%Y-%m-%d') }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.end_of_flowering, format = '%Y-%m-%d') }}</div>
-        <input type="submit" value="Submit" />
+        <div>{{ form.maximum_height.label(class = 'form-label') }}: {{ form.maximum_height(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.beginning_of_flowering.label(class = 'form-label') }}: {{ form.beginning_of_flowering(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.end_of_flowering.label(class = 'form-label') }}: {{ form.end_of_flowering(class = 'mb-3 form-control') }}</div>
+        {{ form.submit(class = 'btn btn-primary') }}
       </div>
     </form>
   </div>
@@ -39,6 +39,7 @@
           <th scope="col">Maximum Height</th>
           <th scope="col">Beginning of Flowering</th>
           <th scope="col">End of Flowering</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -51,6 +52,16 @@
             <td>{{ specie.maximum_height }}</td>
             <td>{{ specie.beginning_of_flowering }}</td>
             <td>{{ specie.end_of_flowering }}</td>
+            <td>
+              <div class="d-flex">
+                <div class="me-2">
+                  <a href="{{ url_for('update_species', id = specie.id) }}"><img src="static/svgs/update.svg" alt="Update" /></a>
+                </div>
+                <div class="ms-2">
+                  <a href="{{ url_for('delete_species', id = specie.id) }}"><img src="static/svgs/Delete.svg" alt="Delete" /></a>
+                </div>
+              </div>
+            </td>
           </tr>
         {% endfor %}
       </tbody>

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+  Trees
+{% endblock %}
+
+{% block content %}
+  {% for message in get_flashed_messages() %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+  <div class="container mt-4 shadow-sm p-3 mb-5 bg-body rounded" style="display:flex;justify-content: center;align-items: center;max-width: 100%;">
+    <form action="/trees/update/{{tree_to_update.id}}" method="post" style="display:flex;justify-content:space-evenly;width:80%;">
+      <div class="left-form">
+        {{ form.hidden_tag() }}
+        <div>{{ form.location_x.label(class = 'form-label') }}: {{ form.location_x(class = 'mb-3 form-control',value=location_x) }}</div>
+        <div>{{ form.height.label(class = 'form-label') }}: {{ form.height(class = 'mb-3 form-control',value=tree_to_update.height) }}</div>
+        <div>{{ form.planting_date.label(class = 'form-label') }}: {{ form.planting_date(class = 'mb-3 form-control',value=tree_to_update.planting_date) }}</div>
+        <div>{{ form.species_id.label(class = 'form-label') }}: {{ form.species_id(class = 'mb-3 form-control',value=tree_to_update.species_id) }}</div>
+        <div>{{ form.state_of_conservation.label(class = 'form-label') }}: {{ form.state_of_conservation(class = 'mb-3 form-control',value=tree_to_update.state_of_conservation) }}</div>
+      </div>
+      <div class="right-form">
+        <div>{{ form.location_y.label(class = 'form-label') }}: {{ form.location_y(class = 'mb-3 form-control',value=location_y) }}</div>
+        <div>{{ form.diameter.label(class = 'form-label') }}: {{ form.diameter(class = 'mb-3 form-control',value=tree_to_update.diameter) }}</div>
+        <div>{{ form.last_pruning.label(class = 'form-label') }}: {{ form.last_pruning(class = 'mb-3 form-control',value=tree_to_update.last_pruning) }}</div>
+        <div>{{ form.gardener_id.label(class = 'form-label') }}: {{ form.gardener_id(class = 'mb-3 form-control',value=tree_to_update.gardener_id) }}</div>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </div>
+    </form>
+  </div>
+ 
+{% endblock %}

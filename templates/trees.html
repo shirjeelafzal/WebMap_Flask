@@ -12,27 +12,36 @@
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
   {% endfor %}
-  <div class="container mt-4" style="display:flex;justify-content: center;align-items: center;">
+  <div class="container mt-4 shadow-sm p-3 mb-5 bg-body rounded" style="display:flex;justify-content: center;align-items: center;max-width: 100%;">
     <form action="/trees" method="post" style="display:flex;justify-content:space-evenly;width:80%;">
       <div class="left-form">
-        {{ form.csrf_token }}
-        <div class="mb-3">{{ wtf.form_field(form.location_x) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.height) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.planting_date) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.species_id) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.state_of_conservation) }}</div>
+        {{ form.hidden_tag() }}
+        {% if  lon is not none %}
+        <div>{{ form.location_x.label(class = 'form-label') }}: {{ form.location_x(class = 'mb-3 form-control',value=lon) }}</div>
+        {%else%}
+        <div>{{ form.location_x.label(class = 'form-label') }}: {{ form.location_x(class = 'mb-3 form-control') }}</div>
+        {% endif %}
+      
+        <div>{{ form.height.label(class = 'form-label') }}: {{ form.height(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.planting_date.label(class = 'form-label') }}: {{ form.planting_date(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.species_id.label(class = 'form-label') }}: {{ form.species_id(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.state_of_conservation.label(class = 'form-label') }}: {{ form.state_of_conservation(class = 'mb-3 form-control') }}</div>
       </div>
       <div class="right-form">
-        <div class="mb-3">{{ wtf.form_field(form.location_y) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.diameter) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.last_pruning) }}</div>
-        <div class="mb-3">{{ wtf.form_field(form.gardener_id) }}</div>
-
-        <input type="submit" value="Submit" />
+        {% if lat is not none %}
+        <div>{{ form.location_y.label(class='form-label') }}: {{ form.location_y(class='mb-3 form-control',value=lat) }}</div>
+    {% else %}
+        <div>{{ form.location_y.label(class='form-label') }}: {{ form.location_y(class='mb-3 form-control') }}</div>
+    {% endif %}
+        
+        <div>{{ form.diameter.label(class = 'form-label') }}: {{ form.diameter(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.last_pruning.label(class = 'form-label') }}: {{ form.last_pruning(class = 'mb-3 form-control') }}</div>
+        <div>{{ form.gardener_id.label(class = 'form-label') }}: {{ form.gardener_id(class = 'mb-3 form-control') }}</div>
+        {{ form.submit(class = 'btn btn-primary mt-4') }}
       </div>
     </form>
   </div>
-  <div class="container">
+  <div class="container mt-2">
     <table class="table">
       <thead class="table-light">
         <tr>
@@ -45,6 +54,7 @@
           <th scope="col">Location</th>
           <th scope="col">Gardener</th>
           <th scope="col">Species</th>
+          <th scope="col">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -59,6 +69,16 @@
             <td>{{ tree.location }}</td>
             <td>{{ tree.gardener_id }}</td>
             <td>{{ tree.species_id }}</td>
+            <td>
+              <div class="d-flex">
+                <div class="me-2">
+                  <a href="{{ url_for('update_trees', id = tree.id) }}"><img src="static/svgs/update.svg" alt="Update" /></a>
+                </div>
+                <div class="ms-2">
+                  <a href="{{ url_for('delete_trees', id = tree.id) }}"><img src="static/svgs/Delete.svg" alt="Delete" /></a>
+                </div>
+              </div>
+            </td>
           </tr>
         {% endfor %}
       </tbody>

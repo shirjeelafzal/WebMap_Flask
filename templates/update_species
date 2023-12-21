@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+  Species
+{% endblock %}
+
+{% block content %}
+  {% for message in get_flashed_messages() %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+  <div class="container mt-4 shadow-sm p-3 mb-5 bg-body rounded" style="display: flex;justify-content:center;align-items: center; max-width: 100%;">
+    <form action="/species/update/{{specie_to_update.id}}" method="post" style="display: flex;justify-content:space-evenly;width: 80%;">
+      {{ form.hidden_tag() }}
+      <div>
+        <div>{{ form.scientific_name.label(class = 'form-label') }}: {{ form.scientific_name(class = 'mb-3 form-control',value=specie_to_update.scientific_name) }}</div>
+        <div>{{ form.common_name.label(class = 'form-label') }}: {{ form.common_name(class = 'mb-3 form-control',value=specie_to_update.common_name) }}</div>
+        <div>{{ form.family.label(class = 'form-label') }}: {{ form.family(class = 'mb-3 form-control',value=specie_to_update.family) }}</div>
+      </div>
+      <div>
+        <div>{{ form.maximum_height.label(class = 'form-label') }}: {{ form.maximum_height(class = 'mb-3 form-control',value=specie_to_update.maximum_height) }}</div>
+        <div>{{ form.beginning_of_flowering.label(class = 'form-label') }}: {{ form.beginning_of_flowering(class = 'mb-3 form-control',value=specie_to_update.beginning_of_flowering) }}</div>
+        <div>{{ form.end_of_flowering.label(class = 'form-label') }}: {{ form.end_of_flowering(class = 'mb-3 form-control',value=specie_to_update.end_of_flowering) }}</div>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </div>
+    </form>
+  </div>
+ 
+{% endblock %}

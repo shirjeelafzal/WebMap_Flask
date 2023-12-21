@@ -1,13 +1,127 @@
 {% extends 'base.html' %}
-
-{% block title %}
-  Home
-{% endblock %}
+{%- block styles %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css" />
+  <link rel="stylesheet" href="static/css/index.css" />
+{%- endblock %}
 {% block content %}
-{% for message in get_flashed_messages() %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <div id="map" class="map"  style="width: 100%; height: 550px;" ></div>
+    <div id="popup" class="ol-popup">
+      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+      <div id="popup-content"></div>
     </div>
-  {% endfor %}
+{% endblock %}
+{% block scripts %}
+  <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+  <script>
+    const container = document.getElementById('popup');
+    const content = document.getElementById('popup-content');
+    const closer = document.getElementById('popup-closer');
+    const overlay= new ol.Overlay({
+      element:container,
+    });
+    var trees = {{ trees_data | tojson | safe }};
+    var points = {{ points | tojson | safe }};
+    var map = new ol.Map({
+      target: 'map',
+      layers: [
+        new ol.layer.Tile({
+          source: new ol.source.OSM()
+        })
+      ],
+      view: new ol.View({
+        center: ol.proj.fromLonLat([0, 0]),
+        zoom: 2
+      }),
+      overlay:[overlay],
+    });
+    let activeTooltip = null;
+    // Add markers for each tree
+    for (var i = 0; i < points.length; i++) {
+      var point = points[i];
+      var tree = trees[i];
+      var marker = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.fromLonLat(point)),      
+        height: tree.height,
+        diameter: tree.diameter,
+        state_of_conservation: tree.state_of_conservation,
+        last_pruning: tree.last_pruning,
+        species_name:tree.species_name,
+      });
+      var markerStyle = new ol.style.Style({
+        image: new ol.style.Icon({
+          src: 'static/svgs/tree-fill.svg',
+          scale: 1.2
+        })
+      });
+
+      marker.setStyle(markerStyle);
+
+      var vectorSource = new ol.source.Vector({
+        features: [marker]
+      });
+
+      var vectorLayer = new ol.layer.Vector({
+        source: vectorSource
+      });
+
+      map.addLayer(vectorLayer);
+    }
+    
+    // Handle click event to display tooltip
+    map.on('dblclick', function (evt) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+        return feature;});
+      
+      if (feature) {
+        var coordinates = evt.coordinate;
+        content_text= '<h4>Tree Information</h4>' +
+        '<p><strong>Specie:</strong> ' + feature.get('species_name') + ' meters</p>' +
+        '<p><strong>Height:</strong> ' + feature.get('height') + ' meters</p>' +
+        '<p><strong>Diameter:</strong> ' + feature.get('diameter') + ' meters</p>' +
+        '<p><strong>State of Conservation:</strong> ' + feature.get('state_of_conservation') + '</p>' +
+        '<p><strong>Last Pruning:</strong> ' + feature.get('last_pruning') + '</p>';
+        content.innerHTML =content_text;
+
+        overlay.setPosition(coordinates)
+        map.addOverlay(overlay);
+        activeTooltip = overlay;
+      }
+      else{
+        // Handle the case when no feature (marker) is clicked.
+      var coordinates = evt.coordinate;
+      var clickedLonLat = ol.proj.toLonLat(coordinates);  // Convert the coordinates to lon/lat
+      var lon = clickedLonLat[0];
+      var lat = clickedLonLat[1];
+
+      // Redirect to the tree.html route with lon and lat as URL parameters
+      window.location.href = '/trees?lon=' + lon + '&lat=' + lat;
+      }
+    });
+
+    // Close the tooltip when clicking outside the marker
+    closer.onclick=function() {
+      overlay.setPosition(undefined)
+    } 
+    var mousePosition = new ol.control.MousePosition({
+      projection: 'EPSG:4326',
+      className:'mousePosition',
+      coordinateFormat: function(coordinate) {
+        return ol.coordinate.format(coordinate, '{x}, {y}', 6);
+      },
+    });
+    map.addControl(mousePosition);
+    var scaleControl=new ol.control.ScaleLine({
+      units: 'metric',
+      bar: true,
+      steps: 4,
+      text: true,
+      minWidth: 140,
+    });
+    map.addControl(scaleControl);
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
 {% endblock %}

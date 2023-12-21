@@ -1,4 +1,5 @@
 webmapVenv/
-.gitignore
 .env
 flask_project
+migrations/
+__pychache__

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block title %}
+  Species
+{% endblock %}
+
+{% block content %}
+  {% for message in get_flashed_messages() %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+
+  <div class="container mt-4 shadow-sm p-3 mb-5 bg-body rounded" style="display:flex;justify-content: center;align-items: center; max-width: 100%;">
+    <form action="/gardeners/update/{{gardener_to_update.id}}" method="post" style="justify-content:space-evenly;width:50%;">
+      {{ form.hidden_tag() }}
+      <div>{{ form.name.label(class = 'form-label') }}: {{ form.name(class = 'mb-3 form-control',value=gardener_to_update.name) }}</div>
+      <div>{{ form.surname.label(class = 'form-label') }}: {{ form.surname(class = 'mb-3 form-control' ,value=gardener_to_update.surname) }}</div>
+      <div>{{ form.email.label(class = 'form-label') }}: {{ form.email(class = 'mb-3 form-control' ,value=gardener_to_update.email) }}</div>
+      <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+  </div>
+ 
+{% endblock %}

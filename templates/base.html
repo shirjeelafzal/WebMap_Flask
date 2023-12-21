@@ -23,7 +23,7 @@
             <a class="nav-link" href="/gardeners">Gardeners</a>
           </li>
         </ul>
-        {% if request.path != '/login' and request.path != '/trees' and request.path != '/gardeners' and request.path != '/species' and request.path != '/' %}
+        {% if request.path != '/login' and request.path != '/trees' and request.path != '/gardeners' and request.path != '/species' %}
           <a href="/login" class="btn btn-outline-success mx-2 px-3" role="button">Login</a>
         {% endif %}
         {% if request.path == '/login' %}
